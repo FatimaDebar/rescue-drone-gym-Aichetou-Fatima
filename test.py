@@ -5,11 +5,11 @@ from baselines.heuristic_agent import run_heuristic_agent
 env = DroneRescueEnv()
 
 print("=" * 50)
-print("🎲 AGENT ALÉATOIRE")
+print(" AGENT ALÉATOIRE")
 print("=" * 50)
 run_random_agent(env, num_episodes=5)
 
 print("\n" + "=" * 50)
-print("🧠 AGENT HEURISTIQUE")
+print(" AGENT HEURISTIQUE")
 print("=" * 50)
 run_heuristic_agent(env, num_episodes=5)

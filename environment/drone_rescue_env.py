@@ -132,8 +132,8 @@ class DroneRescueEnv(gym.Env):
 
     def render(self):
         symbols = {0: ".", 1: "#", 2: "V", 3: "B", 4: "R", 5: "D"}
-        print(f"\n🔋 Batterie: {self.battery} | 👥 Victimes restantes: "
-              f"{self.num_victims - self.victims_rescued} | 👣 Steps: {self.steps}")
+        print(f"\n Batterie: {self.battery} | Victimes restantes: "
+              f"{self.num_victims - self.victims_rescued} | Steps: {self.steps}")
         print("+" + "-" * (self.grid_size * 2 - 1) + "+")
         for row in self.grid:
             print("|" + " ".join(symbols.get(c, "?") for c in row) + "|")
