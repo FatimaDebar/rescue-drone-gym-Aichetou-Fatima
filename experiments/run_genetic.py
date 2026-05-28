@@ -16,7 +16,7 @@ SEED         = 42
 NUM_EPISODES = 30
 GRID_SIZE    = 15
 NUM_VICTIMS  = 5      
-BATTERY_MAX  = 300 
+BATTERY_MAX  = 300
 GA_CONFIG = {
     "pop_size"        : 50,
     "generations"     : 40,
@@ -262,7 +262,19 @@ print(f"\nGraphique sauvegardé dans {output_path}")
 
 # ÉTAPE 6 — SAUVEGARDE DU MEILLEUR GÉNOME
 
-genome_path = "results/best_genome.npy"
-np.save(genome_path, best_genome)
-print(f"Meilleur génome sauvegardé dans {genome_path}")
-print(f"   (pour le recharger : genome = np.load('{genome_path}'))")
+os.makedirs("results", exist_ok=True)
+
+# Sauvegarde dans results/
+genome_path_1 = "results/best_genome.npy"
+np.save(genome_path_1, best_genome)
+print(f"Meilleur génome sauvegardé dans {genome_path_1}")
+
+# Sauvegarde aussi dans experiments/ pour la simulation
+genome_path_2 = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)),
+    "best_genome.npy"
+)
+np.save(genome_path_2, best_genome)
+print(f"Meilleur génome sauvegardé dans {genome_path_2}")
+
+print(f"Fitness du meilleur génome : {max(history['best_fitness']):.1f}")

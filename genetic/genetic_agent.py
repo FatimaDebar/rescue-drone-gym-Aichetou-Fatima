@@ -15,9 +15,9 @@ class GeneticAgent:
         self.returned_to_base = False
         self.steps = 0
 
-    def select_action(self, observation):
-
-        return select_action(self.genome, observation)
+    def select_action(self, observation, env=None):
+        from genetic.genome import select_action as genome_select
+        return genome_select(self.genome, observation, env=env)
 
     def reset_stats(self):
         self.total_reward    = 0.0
@@ -40,7 +40,7 @@ def run_genetic_agent(env, genome, num_episodes=30, seed=42, verbose=True):
         truncated  = False
 
         while not terminated and not truncated:
-            action = agent.select_action(obs)
+            action = agent.select_action(obs, env=env)
             obs, reward, terminated, truncated, info = env.step(action)
             agent.total_reward    += reward
             agent.victims_rescued  = info["victims_rescued"]

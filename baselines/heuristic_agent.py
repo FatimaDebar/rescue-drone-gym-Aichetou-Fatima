@@ -1,26 +1,29 @@
 import numpy as np
 
+
 class HeuristicAgent:
 
     def __init__(self):
         self.stuck_counter = 0
-        self.last_pos = None
+        self.last_pos      = None
         self.random_escape = 0
         self.recharge_used = False
 
     def select_action(self, observation, env):
-        drone_x = int(observation[0])
-        drone_y = int(observation[1])
-        battery  = int(observation[2])
-        victims_left = int(observation[3])
+
+        # ✅ CORRECTION : dénormaliser l'observation
+        drone_x      = int(round(observation[0] * env.grid_size))
+        drone_y      = int(round(observation[1] * env.grid_size))
+        battery      = int(round(observation[2] * env.battery_max))
+        victims_left = int(round(observation[3] * env.num_victims))
 
         base_x, base_y = env.base_pos
-        dist_to_base = abs(drone_x - base_x) + abs(drone_y - base_y)
+        dist_to_base   = abs(drone_x - base_x) + abs(drone_y - base_y)
 
-        #Trouver la station de recharge
+        # Trouver la station de recharge
         recharge_pos = self._find_recharge(env)
 
-        # Détection blocage 
+        # Détection blocage
         current_pos = (drone_x, drone_y)
         if current_pos == self.last_pos:
             self.stuck_counter += 1
@@ -36,35 +39,39 @@ class HeuristicAgent:
             self.random_escape -= 1
             return self._random_free_action(drone_x, drone_y, env)
 
-        # Aller recharger si batterie moyenne et recharge proche
+        # Aller recharger si batterie basse et recharge proche
         if recharge_pos and not self.recharge_used:
             rx, ry = recharge_pos
             dist_to_recharge = abs(drone_x - rx) + abs(drone_y - ry)
-            battery_pct = battery / env.battery_max
+            battery_pct      = battery / env.battery_max
 
-            # Si batterie entre 20% et 40% ET recharge plus proche que la base
             if 0.20 <= battery_pct <= 0.40 and dist_to_recharge < dist_to_base:
                 self.recharge_used = True
                 return self._move_toward(drone_x, drone_y, rx, ry, env)
 
-        # Reset recharge si batterie pleine
+        # Reset recharge si batterie suffisamment rechargée
         if battery >= env.battery_max * 0.9:
             self.recharge_used = False
 
-        # Rentrer si batterie insuffisante 
+        # Rentrer si batterie insuffisante pour continuer
         if battery <= dist_to_base + 8:
             return self._move_toward(drone_x, drone_y, base_x, base_y, env)
 
-        # Plus de victimes -> rentre à la base
+        # Plus de victimes → rentrer à la base
         if victims_left == 0:
             return self._move_toward(drone_x, drone_y, base_x, base_y, env)
 
-        # Va vers la victime la plus proche
+        # Aller vers la victime la plus proche
         if len(env.victims_positions) > 0:
-            closest = self._find_closest_victim(drone_x, drone_y, env.victims_positions)
+            closest = self._find_closest_victim(
+                drone_x, drone_y, env.victims_positions
+            )
             return self._move_toward(drone_x, drone_y, closest[0], closest[1], env)
 
+        # Par défaut : rentrer à la base
         return self._move_toward(drone_x, drone_y, base_x, base_y, env)
+
+    # ── utilitaires ──────────────────────────────────────────────────────────
 
     def _find_recharge(self, env):
         for x in range(env.grid_size):
@@ -74,13 +81,13 @@ class HeuristicAgent:
         return None
 
     def _find_closest_victim(self, x, y, victims):
-        closest = None
+        closest  = None
         min_dist = float('inf')
         for vx, vy in victims:
             dist = abs(vx - x) + abs(vy - y)
             if dist < min_dist:
                 min_dist = dist
-                closest = (vx, vy)
+                closest  = (vx, vy)
         return closest
 
     def _move_toward(self, x, y, tx, ty, env):
@@ -124,40 +131,42 @@ class HeuristicAgent:
                 env.grid[x, y] != 1)
 
 
+# ── fonction d'évaluation ─────────────────────────────────────────────────────
+
 def run_heuristic_agent(env, num_episodes=30, seed=42):
     np.random.seed(seed)
     results = []
 
     for episode in range(num_episodes):
-        agent = HeuristicAgent()
-        obs, info = env.reset(seed=seed + episode)
-        total_reward = 0
-        victims_rescued = 0
+        agent            = HeuristicAgent()
+        obs, info        = env.reset(seed=seed + episode)
+        total_reward     = 0
+        victims_rescued  = 0
         returned_to_base = False
-        terminated = False
-        truncated = False
+        terminated       = False
+        truncated        = False
 
         while not terminated and not truncated:
             action = agent.select_action(obs, env)
             obs, reward, terminated, truncated, info = env.step(action)
-            total_reward += reward
-            victims_rescued = info["victims_rescued"]
+            total_reward    += reward
+            victims_rescued  = info["victims_rescued"]
 
         if terminated and info["battery"] > 0:
             returned_to_base = True
 
         results.append({
-            "episode": episode + 1,
-            "total_reward": total_reward,
-            "victims_rescued": victims_rescued,
+            "episode":          episode + 1,
+            "total_reward":     total_reward,
+            "victims_rescued":  victims_rescued,
             "returned_to_base": returned_to_base,
-            "steps": info["steps"]
+            "steps":            info["steps"]
         })
 
         print(f"[Heuristique] Épisode {episode+1:2d} | "
               f"Reward: {total_reward:6.1f} | "
               f"Victimes: {victims_rescued}/{env.num_victims} | "
-              f"Retour: { 'ok' if returned_to_base else 'Non'} | "
+              f"Retour: {'ok' if returned_to_base else 'Non'} | "
               f"Steps: {info['steps']}")
 
     return results
