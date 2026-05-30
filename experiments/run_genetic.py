@@ -19,17 +19,16 @@ NUM_VICTIMS  = 5
 BATTERY_MAX  = 300
 GA_CONFIG = {
     "pop_size"        : 50,
-    "generations"     : 40,
-    "elite_size"      : 3,
-    "tournament_size" : 4,
+    "generations"     : 60,      
+    "elite_size"      : 5,       
+    "tournament_size" : 5,       
     "crossover_rate"  : 0.5,
     "mutation_rate"   : 0.15,
     "mutation_std"    : 0.3,
-    "n_eval_episodes" : 3,
+    "n_eval_episodes" : 5,       
     "seed"            : 42,
     "verbose"         : True,
 }
-
 os.makedirs("results/plots", exist_ok=True)
 
 # ENVIRONNEMENT
@@ -120,8 +119,8 @@ agents  = ["Aléatoire", "Heuristique", "Génétique"]
 colors  = ["red", "blue", "green"]
 r_stats = [random_stats, heuristic_stats, genetic_stats]
 
-fig, axes = plt.subplots(3, 3, figsize=(20, 16))
-fig.suptitle("Drone Secouriste — Comparaison des 3 agents", fontsize=16, fontweight='bold')
+fig, axes = plt.subplots(3, 3, figsize=(20, 18))
+fig.suptitle("Drone Secouriste — Comparaison des 3 agents", fontsize=16, fontweight='bold', y=0.98)
 
 # Graphique 1 : Score par épisode 
 for stats, label, color in zip(r_stats, agents, colors):
@@ -254,7 +253,7 @@ axes[2, 2].legend()
 axes[2, 2].grid(True, alpha=0.3, axis='y')
 
 #Sauvegarde
-plt.tight_layout()
+plt.tight_layout(rect=[0, 0, 1, 0.96])
 output_path = "results/plots/comparaison_3_agents.png"
 plt.savefig(output_path, dpi=150, bbox_inches='tight')
 plt.show()

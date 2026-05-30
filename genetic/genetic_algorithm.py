@@ -97,7 +97,7 @@ def genetic_algorithm(
     for gen in range(generations):
 
         # Mutation std décroissante : exploration -> exploitation
-        current_std = mutation_std * (1.0 - 0.6 * gen / generations)
+        current_std = mutation_std * (1.0 - 0.75 * gen / generations)
 
         # Évaluation fitness
         fitness_scores = [
